@@ -2,9 +2,14 @@ package com.ma.home;
 
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.security.AuthenticationUser;
 import org.apache.activemq.security.SimpleAuthenticationPlugin;
 
 import javax.jms.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Server implements  MessageListener {
     private static int ackMode;
@@ -26,12 +31,6 @@ public class Server implements  MessageListener {
 
     public Server() {
         try {
-            //simpleAuthenticationPlugin = new SimpleAuthenticationPlugin();
-           // Map<String, String> map = new HashMap<String, String>();
-           // map.put(username, password);
-          //  simpleAuthenticationPlugin.setUserPasswords(map);
-           // simpleAuthenticationPlugin.setUserGroups(map);
-
             //This message broker is embedded
             BrokerService broker = new BrokerService();
             broker.setPersistent(false);
@@ -39,9 +38,6 @@ public class Server implements  MessageListener {
             broker.addConnector(messageBrokerUrl);
             MyAuthenticationPlugin[] myAuthenticationPlugin = new MyAuthenticationPlugin[1];
             myAuthenticationPlugin[0] = new MyAuthenticationPlugin();
-
-            //SimpleAuthenticationPlugin[] simpleAuthenticationPlugins = new SimpleAuthenticationPlugin[1];
-            //simpleAuthenticationPlugins[0] = simpleAuthenticationPlugin;
             broker.setPlugins(myAuthenticationPlugin);
             broker.start();
         } catch (Exception e) {
@@ -52,13 +48,12 @@ public class Server implements  MessageListener {
 
     private void setupMessageQueueConsumer() {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(messageBrokerUrl);
-
         connectionFactory.setUserName(username);
         connectionFactory.setPassword(password);
 
         Connection connection;
         try {
-            connection = connectionFactory.createConnection();
+            connection = connectionFactory.createConnection(username, password);
             connection.start(); // This line thows exception
             this.session = connection.createSession(this.transacted, ackMode);
             Destination adminQueue = this.session.createQueue(messageQueueName);
