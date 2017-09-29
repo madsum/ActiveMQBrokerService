@@ -1,34 +1,50 @@
 package com.ma.home;
 
+import org.apache.activemq.broker.Broker;
+import org.apache.activemq.broker.TransactionBroker;
+import org.apache.activemq.filter.DestinationMapEntry;
 import org.apache.activemq.jaas.GroupPrincipal;
-import org.apache.activemq.security.AuthenticationUser;
-import org.apache.activemq.security.SimpleAuthenticationPlugin;
+import org.apache.activemq.security.*;
 
 import java.security.Principal;
 import java.util.*;
 
-public class MyAuthenticationPlugin extends SimpleAuthenticationPlugin {
-    private String  username ="username";
-    private String  password ="password";
-    private String  groups = "groups";
+            public class MyAuthenticationPlugin extends SimpleAuthenticationPlugin {
+                private String  username ="username";
+                private String  password ="password";
+                private String  groups = "groups";
 
-    Map<String, String> userPasswords = new HashMap<String, String>();
-    private Map<String, Set<Principal>> userGroups;
-    List<AuthenticationUser> authenticationUserList = new ArrayList();
+                Map<String, String> userPasswords = new HashMap<String, String>();
+                List<AuthenticationUser> authenticationUserList = new ArrayList();
 
-    public MyAuthenticationPlugin(){
-        secureME();
-    }
-    public void secureME(){
-        //userPasswords.put(username, password);
-        addAuthenticationUser(new AuthenticationUser(username,password, groups));
-        //this.setUserPasswords(userPasswords);
-        this.setUsers(authenticationUserList);
-    }
+                public MyAuthenticationPlugin(){
+                    secureME();
+                }
+                public void secureME(){
+                    userPasswords.put(username, password);
+                    authenticationUserList.add(new AuthenticationUser(username,password, groups));
+                    this.setUserPasswords(userPasswords);
+                    this.setUsers(authenticationUserList);
+                }
+    /*
+   // @Override
+    public Broker installPlugin(Broker broker) {
+        AuthorizationPlugin authorizationPlugin = new AuthorizationPlugin();
+        List<DestinationMapEntry> entries = new ArrayList<DestinationMapEntry>();
+        try {
+            entries.add(makeTopicAuthorization("groupA.topic", "groupA", "groupA", "groupA"));
+            entries.add(makeQueueAuthorization("groupA.queue", "groupA", "groupA", "groupA"));
+            entries.add(makeQueueAuthorization("groupB.queue", "groupB", "groupB", "groupB"));
+            entries.add(makeTopicAuthorization("ActiveMQ.Advisory.>", "all", "all", "all"));
+            AuthorizationMap authMap = new DefaultAuthorizationMap(entries);
+            return new AuthorizationBroker(broker, authMap);
+        } catch (Exception e) {
+            LOGGER.error(e);
+        }
 
-    public void addAuthenticationUser(AuthenticationUser authenticationUser){
-        authenticationUserList.add(authenticationUser);
+        return new AuthorizationBroker(broker, null);
     }
+    */
 
 /*
         public Map<String, Set<Principal>> setmyUsers(List<?> users) {
